@@ -2,8 +2,8 @@ using SharedModels.Question;
 using Microsoft.AspNetCore.Mvc;
 using BrainBoxAPI.Managers;
 using AutoMapper;
-using BrainBoxAPI.Data;
 using BrainBoxAPI.Models;
+using SharedModels.Lobby;
 
 namespace BrainBoxAPI.Controllers
 {
@@ -54,6 +54,24 @@ namespace BrainBoxAPI.Controllers
             _questionRepo.Add(dbModel);
             _questionRepo.Save();
             return Ok("Question created successfully.");
+        }
+
+        [HttpPost("{roomId}")]
+        public async Task<IActionResult> SaveMultipleQuestions(int roomId, [FromBody] List<QuestionWithAnswerDTO> questionModels)
+        {
+            if (questionModels == null)
+            {
+                return BadRequest("Question data is invalid");
+            }
+
+            var dbModels = _mapper.Map<List<QuestionModel>>(questionModels);
+            foreach(var model in dbModels)
+            {
+                model.RoomId = roomId;
+                _questionRepo.Add(model);
+            }
+            _questionRepo.Save();
+            return Ok("Questions created successfully.");
         }
     }
 }
